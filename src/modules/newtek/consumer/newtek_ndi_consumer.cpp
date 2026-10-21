@@ -23,6 +23,7 @@
 #include "../StdAfx.h"
 
 #include "newtek_ndi_consumer.h"
+#include "ndi_box3.h"
 
 #include <boost/thread/exceptions.hpp>
 #include <chrono>
@@ -250,7 +251,13 @@ struct newtek_ndi_consumer : public core::frame_consumer
                         int src_stride[] = { format_desc_.width * 4, 0, 0, 0 };
                         uint8_t* dst[] = { scaled_.data(), nullptr, nullptr, nullptr };
                         int dst_stride[] = { monitor_width_ * 4, 0, 0, 0 };
-                        sws_scale(scaler_, src, src_stride, 0, format_desc_.height, dst, dst_stride);
+                        if (format_desc_.width == monitor_width_ * 3 &&
+                            format_desc_.height == monitor_height_ * 3) {
+                            ndi_box3(reinterpret_cast<const uint32_t*>(src[0]),
+                                     reinterpret_cast<uint32_t*>(dst[0]), monitor_width_, monitor_height_);
+                        } else {
+                            sws_scale(scaler_, src, src_stride, 0, format_desc_.height, dst, dst_stride);
+                        }
                         ndi_video_frame_.p_data = scaled_.data();
                         // Release the shared GPU readback before NDI compression/network I/O.
                         frame = core::const_frame{};
