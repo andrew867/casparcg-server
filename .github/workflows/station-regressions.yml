@@ -1,5 +1,6 @@
 name: Station patch checks
 on:
+  workflow_dispatch:
   push:
     branches: ["station/2.5.1"]
   pull_request:
