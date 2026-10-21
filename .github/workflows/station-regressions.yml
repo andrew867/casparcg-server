@@ -32,7 +32,7 @@ jobs:
           curl --fail --location --retry 3 -o /tmp/cef.deb 'https://github.com/CasparCG/server/releases/download/v2.5.1-stable/casparcg-cef-142_142.0.17.g60aac24%2B2-noble1_amd64.deb'
           echo '052cdd35dfdadc28aeee7deb34f3adabda87674269e2b84dcb44a40f0e9c3d52  /tmp/cef.deb' | sha256sum -c -
           sudo apt-get install -y /tmp/cef.deb
-      - name: Compile patched engine with system CEF
+      - name: Compile patched engine with checksum-verified CEF SDK
         run: |
-          cmake -GNinja -S src -B /tmp/station-build -DUSE_SYSTEM_CEF=ON -DUSE_STATIC_BOOST=OFF -DCMAKE_BUILD_TYPE=Release -DDIAG_FONT_PATH=/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf
+          cmake -GNinja -S src -B /tmp/station-build -DUSE_SYSTEM_CEF=OFF -DUSE_STATIC_BOOST=OFF -DCMAKE_BUILD_TYPE=Release -DDIAG_FONT_PATH=/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf
           cmake --build /tmp/station-build --parallel 2
