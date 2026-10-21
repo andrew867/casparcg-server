@@ -865,15 +865,12 @@ struct AVProducer::Impl
         , video_executor_(L"video-executor")
         , audio_executor_(L"audio-executor")
     {
-        // Restrict freshness policy to our muted camera contribution paths.
+        // Restrict freshness policy to explicitly configured camera contribution paths.
         // File/music producers keep lossless, ordered buffering.
-        live_camera_ = env::properties().get(L"configuration.ffmpeg.producer.live-camera-latest", false) &&
-            (path_.rfind("rtsp://192.0.2.10:8554/", 0) == 0 ||
-             path_.rfind("rtsp://127.0.0.1:8555/", 0) == 0 ||
-             path_.rfind("rtmp://192.0.2.10/", 0) == 0);
+        live_camera_ = configured_camera(path_);
         if (live_camera_) {
             buffer_capacity_ = 4;
-            auto name = path_.substr(path_.find('/', path_.find("://") + 3) + 1);
+            auto name = configured_camera_name(path_).value_or("");
             if (!name.empty() && name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-/") == std::string::npos) {
                 camera_recovery_ = std::make_shared<CameraRecovery>();
                 std::string encoded;

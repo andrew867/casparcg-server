@@ -45,3 +45,9 @@ needs its own supported runtime and listening tests. The stack-canary change
 needs upstream security review. The output queue and live-camera policies need
 audio/video sync and failure-recovery review. Do not submit the complete series
 as one unreviewed PR.
+
+## Portable camera policy follow-up
+
+The seventeenth patch, configured-camera-prefixes.patch, replaces installation-specific URL matches with explicit camera-prefixes/prefix entries under configuration.ffmpeg.producer. Prefixes must end in a slash and use RTSP, RTMP or RTMPS. No configured prefixes means no live-camera freshness policy. The generated station config declares upstream and fan-out prefixes. A nested base path is removed before forming the recovery control filename.
+
+RTSP camera TCP transport and bounded socket options now live in the native input reader and work in Intel/software profiles as well as NVIDIA. Unrelated files, music and other network inputs retain their original behavior. Prefix boundary regression and full native compile are required. This candidate change is not yet deployed to the established station.

@@ -18,6 +18,8 @@ jobs:
         run: |
           g++ -std=c++17 -O2 -pthread -Isrc/accelerator/ogl/util tests/station/test-idle-cache.cpp -o /tmp/test-idle-cache
           /tmp/test-idle-cache
+          g++ -std=c++17 -O2 -Isrc/modules/ffmpeg/producer tests/station/test-camera-policy.cpp -o /tmp/test-camera-policy
+          /tmp/test-camera-policy
           g++ -std=c++17 -O2 -Isrc/modules/newtek/consumer tests/station/test-ndi-box3.cpp $(pkg-config --cflags --libs libswscale) -o /tmp/test-ndi-box3
           /tmp/test-ndi-box3
   linux-compile:

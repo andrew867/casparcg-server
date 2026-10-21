@@ -1,4 +1,7 @@
 #include "av_input.h"
+#include "camera_policy.h"
+#include <common/env.h>
+#include <boost/property_tree/ptree.hpp>
 
 #include "../util/av_assert.h"
 #include "../util/av_util.h"
@@ -25,6 +28,23 @@ extern "C" {
 #endif
 
 namespace caspar { namespace ffmpeg {
+
+std::optional<std::string> configured_camera_name(const std::string& path)
+{
+    if (!env::properties().get(L"configuration.ffmpeg.producer.live-camera-latest", false))
+        return {};
+    auto prefixes = env::properties().get_child_optional(L"configuration.ffmpeg.producer.camera-prefixes");
+    if (!prefixes) return {};
+    size_t matched = 0;
+    for (const auto& item : *prefixes) {
+        const auto prefix = u8(item.second.get_value<std::wstring>());
+        if (item.first == L"prefix" && camera_prefix_matches(path, prefix) && prefix.size() > matched)
+            matched = prefix.size();
+    }
+    return matched ? std::optional<std::string>(path.substr(matched)) : std::optional<std::string>();
+}
+
+bool configured_camera(const std::string& path) { return configured_camera_name(path).has_value(); }
 
 Input::Input(const std::string& filename, std::shared_ptr<diagnostics::graph> graph, std::optional<bool> seekable)
     : filename_(filename)
@@ -172,6 +192,13 @@ void Input::internal_reset()
     } else if (PROTOCOLS_TREATED_AS_FORMATS.find(url_parts.first) != PROTOCOLS_TREATED_AS_FORMATS.end()) {
         input_format = av_find_input_format(u8(url_parts.first).c_str());
         filename_    = u8(url_parts.second);
+    }
+
+    if (url_parts.first == L"rtsp" && configured_camera(filename_)) {
+        FF(av_dict_set(&options, "rtsp_transport", "tcp", 0));
+        FF(av_dict_set(&options, "buffer_size", "4194304", 0));
+        FF(av_dict_set(&options, "max_delay", "2000000", 0));
+        FF(av_dict_set(&options, "timeout", "15000000", 0));
     }
 
     if (seekable_) {

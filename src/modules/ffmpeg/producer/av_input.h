@@ -21,6 +21,9 @@ struct AVFormatContext;
 
 namespace caspar { namespace ffmpeg {
 
+bool configured_camera(const std::string& path);
+std::optional<std::string> configured_camera_name(const std::string& path);
+
 class Input
 {
   public:
