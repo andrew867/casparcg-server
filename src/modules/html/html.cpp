@@ -219,6 +219,10 @@ class renderer_application
     IMPLEMENT_REFCOUNTING(renderer_application);
 };
 
+// CEF changes the stack canary after fork; callers must not check the old one.
+#if defined(__linux__) && (defined(__GNUC__) || defined(__clang__))
+__attribute__((no_stack_protector))
+#endif
 bool intercept_command_line(int argc, char** argv)
 {
 #ifdef _WIN32
